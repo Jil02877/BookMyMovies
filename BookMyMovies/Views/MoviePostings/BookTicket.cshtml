@@ -1,0 +1,38 @@
+﻿@model BookMyMovies.Models.MoviePosting
+
+@{
+    ViewData["Title"] = "Book Ticket";
+    var bookedSeats = ViewBag.BookedSeats as List<string> ?? new List<string>();
+}
+
+<h2 class="text-center m-3">Book Your Seat for @Model.Title</h2>
+
+<div class="text-center mb-3">
+    <strong>Theater:</strong> @Model.Theater |
+    <strong>Location:</strong> @Model.Location |
+    <strong>Date:</strong> @Model.PostedDate.ToShortDateString()
+</div>
+
+<form asp-action="BookTicket" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+
+    <div class="seat-selection text-center">
+        <p>Select your seat(s):</p>
+        <div class="d-flex flex-wrap justify-content-center">
+            @for (int i = 1; i <= @Model.TotalSeats; i++)
+            {
+                string seatNumber = "A" + i;
+                bool isBooked = bookedSeats.Contains(seatNumber);
+
+                <label class="m-3">
+                    <input type="checkbox" class=" @(isBooked ? "bg-secondary text-white" : "")" name="selectedSeats" value="@seatNumber" @(isBooked ? "disabled" : "") />
+                    <span class="btn btn-outline-primary btn-sm @(isBooked ? "disabled" : "")">@seatNumber</span>
+                </label>
+            }
+        </div>
+    </div>
+
+    <div class="text-center mt-3">
+        <button type="submit" class="btn btn-success">Confirm Booking</button>
+    </div>
+</form>
