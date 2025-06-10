@@ -1,0 +1,55 @@
+﻿@model IEnumerable<BookMyMovies.Models.Booking>
+
+<h2 class="text-center my-4">My Booking History</h2>
+
+@if (!Model.Any())
+{
+	<p>You have not booked any tickets yet.</p>
+}
+
+else
+{
+	<table class="table table-bordered">
+		<thead> 
+			<tr>
+			 	<th>Movie</th>
+				<th>Theater</th>
+				<th>Seats</th>
+				<th>Date</th>
+				<th>Status</th>
+				<th>Download Ticket</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var booking in Model)
+			{
+				<tr>
+					<td>@booking.MoviePosting.Title</td>
+					<td>@booking.MoviePosting.Theater</td>
+					<td>@booking.SeatsBooked</td>
+					<td>@booking.BookingDate.ToString("dd MMM yyyy")</td>
+					<td>
+						<span class="badge @(booking.PaymentStatus == "Paid" ? "bg-success" : "bg-warning")">
+							@booking.PaymentStatus
+						</span>
+					</td>
+					<td>
+						@{
+							var fileName = $"Ticket_{booking.Id}.pdf";
+							var filePath = Url.Content($"~/pdfs/{fileName}");
+							var fullPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/pdfs", fileName);
+						}
+						@if (System.IO.File.Exists(fullPath))
+						{
+							<a class="btn btn-sm btn-outline-primary" href="@filePath" target="_blank">Download</a>
+						}
+						else
+						{
+							<span class="text-muted">Not Available</span>
+						}
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}

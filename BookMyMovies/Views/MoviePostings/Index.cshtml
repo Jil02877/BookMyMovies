@@ -2,6 +2,23 @@
 @model IEnumerable<BookMyMovies.Models.MoviePosting>
 
 <h1 class="text-center m-5">All Available Movies</h1>
+@if (TempData["BookingMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["BookingMessage"]
+        @if (TempData["PDFTicketPath"] != null)
+        {
+            <br />
+            <a class="btn btn-sm btn-primary mt-2" href="@TempData["PDFTicketPath"]" target="_blank">Download Ticket PDF</a>
+        }
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
 @if (User.IsInRole(Roles.Admin) || User.IsInRole(Roles.Employer))
 {
     <div class="text-end mb-3">
@@ -23,6 +40,12 @@
                         <li><strong>Date:</strong> @moviePosting.PostedDate.ToShortDateString()</li>
                         <li><strong>Seats:</strong> @moviePosting.SeatsAvailable / @moviePosting.TotalSeats</li>
                         <li><strong>Price:</strong> ₹@moviePosting.Price</li>
+                        <li>
+                            <strong>Seat Availability Status:</strong>
+                            <span class="badge @(moviePosting.IsSeatAvailable ? "bg-success text-white" : "bg-danger text-white")">
+                                @(moviePosting.IsSeatAvailable ? "Available" : "Not Available")
+                            </span>
+                        </li>
                     </ul>
 
                     <div class="mt-auto">

@@ -1,11 +1,16 @@
-﻿using BookMyMovies.Models;
+﻿using BookMyMovies.Constants;
+using BookMyMovies.Data;
+using BookMyMovies.Helpers;
+using BookMyMovies.Models;
 using BookMyMovies.Repositories;
+using BookMyMovies.Services;
+using BookMyMovies.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using BookMyMovies.ViewModels;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using BookMyMovies.Constants;
-using Microsoft.AspNetCore.Authorization;
+using Mono.TextTemplating;
 namespace BookMyMovies.Controllers
 {
     [Authorize]
@@ -13,11 +18,16 @@ namespace BookMyMovies.Controllers
     {
         private readonly IRepository<MoviePosting> _repository;
         private readonly UserManager<IdentityUser> _userManager;
-
-        public MoviePostingsController(IRepository<MoviePosting> repository,UserManager<IdentityUser> userManager)
+        private readonly EmailService _emailService;
+        private readonly ApplicationDbContext _context;
+        private readonly IBookingService _bookingService;
+        public MoviePostingsController(IRepository<MoviePosting> repository,UserManager<IdentityUser> userManager,EmailService emailService, ApplicationDbContext context,IBookingService bookingService)
         {
             _repository = repository;
             _userManager = userManager;
+            _emailService = emailService;
+            _context = context;
+            _bookingService = bookingService;
         }
         [AllowAnonymous]
         public async Task<IActionResult> Index()
@@ -113,33 +123,24 @@ namespace BookMyMovies.Controllers
 
             return View(movie);
         }
+
         [HttpPost]
         [Authorize(Roles = Roles.User)]
         public async Task<IActionResult> BookTicket(int id,List<string> selectedSeats)
         {
-            var movie = await _repository.GetByIdAsync(id);
-            if (movie == null) return NotFound();
+            var result = await _bookingService.BookTicketsAsync(id, selectedSeats, User);
+            if (!result.success)
+            {
+                TempData["Error"] = result.message;
+                return RedirectToAction(nameof(Index));
+            }
 
-            var bookedSeats = string.IsNullOrEmpty(movie.SeatLayoutJson) ? new List<string>() : System.Text.Json.JsonSerializer.Deserialize<List<string>>(movie.SeatLayoutJson);
+            TempData["BookingMessage"] = result.message;
+            TempData["PDFTicketPath"] = result.pdfUrl;
 
-            bookedSeats.AddRange(selectedSeats);
-
-            bookedSeats = bookedSeats.Distinct().ToList();
-
-            movie.SeatLayoutJson = System.Text.Json.JsonSerializer.Serialize(bookedSeats);
-
-            movie.SeatsAvailable = movie.TotalSeats - bookedSeats.Count;
-            movie.IsSeatAvailable = movie.SeatsAvailable > 0;
-
-            int seatCount = selectedSeats.Count;
-            float totalAmount = seatCount * movie.Price;
-
-            // You can pass this to a View, send it in a confirmation, etc.
-            TempData["BookingMessage"] = $"Successfully booked {seatCount} seat(s) for ₹{totalAmount}";
-
-
-            await _repository.UpdateAsync(movie);
             return RedirectToAction(nameof(Index));
         }
+
+
     }
 }

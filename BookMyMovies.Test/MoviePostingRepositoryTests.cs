@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BookMyMovies.Repositories;
 using BookMyMovies.Models;
+using Microsoft.AspNetCore.Identity;
 namespace BookMyMovies.Test
 {
     public class MoviePostingRepositoryTests
@@ -178,6 +179,47 @@ namespace BookMyMovies.Test
             await repository.DeleteAsync(moviePosting.Id);
             var result = db.MoviePostings.Find(moviePosting.Id);
             Assert.Null(result);
+        }
+
+        [Fact]
+        public async Task History_ReturnViewResult_WithBookingForUser()
+        {
+            var db = CreateDbContext();
+
+            var testUser = new IdentityUser
+            {
+                Id = "user123",
+                UserName = "test@example.com"
+            };
+
+            var movie = new MoviePosting
+            {
+                Id = 1,
+                Title = "Test Movie",
+                Theater = "Test Theater",
+                Location = "Test City",
+                Description = "Test Desc",
+                ImageUrl = "/test.jpg",
+                IsApproved = true,
+                SeatsAvailable = 10,
+                TotalSeats = 10,
+                UserId = "user123",
+            };
+
+            var booking = new Booking
+            {
+                Id = 1,
+                UserId = "user123",
+                MoviePostingId = 1,
+                BookingDate = DateTime.UtcNow,
+                PaymentStatus = "Paid",
+                SeatNumbers = "A1,A2"
+            };
+            db.MoviePostings.Add(movie);
+            db.Bookings.Add(booking);
+            await db.SaveChangesAsync();
+
+           
         }
     }
 }

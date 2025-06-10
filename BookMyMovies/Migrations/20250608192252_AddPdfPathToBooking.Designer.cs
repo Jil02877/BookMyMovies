@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookMyMovies.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250605070407_chage_seatlayoutjson")]
-    partial class chage_seatlayoutjson
+    [Migration("20250608192252_AddPdfPathToBooking")]
+    partial class AddPdfPathToBooking
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,46 @@ namespace BookMyMovies.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("BookMyMovies.Models.Booking", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("BookingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MoviePostingId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PdfPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SeatNumbers")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SeatsBooked")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MoviePostingId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Bookings");
+                });
 
             modelBuilder.Entity("BookMyMovies.Models.MoviePosting", b =>
                 {
@@ -285,6 +325,25 @@ namespace BookMyMovies.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("BookMyMovies.Models.Booking", b =>
+                {
+                    b.HasOne("BookMyMovies.Models.MoviePosting", "MoviePosting")
+                        .WithMany()
+                        .HasForeignKey("MoviePostingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MoviePosting");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BookMyMovies.Models.MoviePosting", b =>

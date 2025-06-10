@@ -1,9 +1,10 @@
 using BookMyMovies.Data;
 using BookMyMovies.Models;
 using BookMyMovies.Repositories;
+using BookMyMovies.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
+using System.Security.Claims;
 namespace BookMyMovies
 {
     public class Program
@@ -24,7 +25,7 @@ namespace BookMyMovies
             builder.Services.AddDefaultIdentity<IdentityUser>(
             options =>
                 {
-                    options.SignIn.RequireConfirmedAccount = true;
+                    options.SignIn.RequireConfirmedAccount = false;
                   
             })
             .AddRoles<IdentityRole>()
@@ -33,8 +34,15 @@ namespace BookMyMovies
             builder.Services.AddScoped<IRepository<MoviePosting>,
                 MoviePostingRepository>();
 
+            builder.Services.AddScoped<IBookingService, BookingService>();
+
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+            builder.Services.AddTransient<EmailService>();
+
             builder.Services.AddControllersWithViews();
 
+           
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -56,6 +64,7 @@ namespace BookMyMovies
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapRazorPages(); // For Identity pages
