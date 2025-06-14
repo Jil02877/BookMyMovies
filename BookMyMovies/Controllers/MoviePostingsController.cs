@@ -29,34 +29,39 @@ namespace BookMyMovies.Controllers
             _context = context;
             _bookingService = bookingService;
         }
+
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            if(User.IsInRole(Roles.Admin) || User.IsInRole(Roles.Employer)) 
+            var allMovies = await _repository.GetAllAsync();
+            var sortedMovies = allMovies.OrderByDescending(mp => mp.PostedDate).ToList();
+
+            // Pass the whole sorted list to the view
+            IEnumerable<MoviePosting> moviesToDisplay = sortedMovies;
+
+            if (User.Identity.IsAuthenticated)
             {
-                var allMoviePostings = await _repository.GetAllAsync();
-                var userId = _userManager.GetUserId(User);
-                var filteredMoviePostings = allMoviePostings
-                    .Where(mp => mp.UserId == userId)
-                    .OrderByDescending(mp => mp.PostedDate);
+                if (User.IsInRole(Roles.Admin) || User.IsInRole(Roles.Employer))
+                {
+                    var userId = _userManager.GetUserId(User);
+                    moviesToDisplay = sortedMovies.Where(mp => mp.UserId == userId);
+                }
 
-                return View(filteredMoviePostings);
+                if (User.IsInRole(Roles.User))
+                {
+                    var userId = _userManager.GetUserId(User);
+                    var userBookings = await _context.Bookings
+                        .Where(b => b.UserId == userId)
+                        .Select(b => b.MoviePostingId)
+                        .ToListAsync();
 
+                    ViewBag.BookedMovieIds = userBookings;
+                }
             }
-            if (User.IsInRole(Roles.User))
-            {
-                var allMoviePostings = await _repository.GetAllAsync();
-                var sorted = allMoviePostings.OrderByDescending(mp => mp.PostedDate); 
-                return View(sorted);
-            }
 
-            var latest3Movies = await _repository.GetAllAsync();
-            var result = latest3Movies
-                .OrderByDescending(mp => mp.PostedDate)
-                .Take(3);
-
-            return View(result);
+            return View(moviesToDisplay);
         }
+
 
         [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
@@ -164,7 +169,7 @@ namespace BookMyMovies.Controllers
             TempData["BookingMessage"] = result.message;
             TempData["PDFTicketPath"] = result.pdfUrl;
 
-            return RedirectToAction(nameof(BookTicket), new { id });
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpGet]
@@ -237,6 +242,48 @@ namespace BookMyMovies.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        [Authorize(Roles = Roles.User)]
 
+        public async Task<IActionResult> EditBooking(int id)
+        {
+            var movie = await _repository.GetByIdAsync(id);
+            if (movie == null) return NotFound();
+            
+            var userId = _userManager.GetUserId(User);
+
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.MoviePostingId == id && b.UserId == userId);
+
+            if (booking == null) return NotFound();
+
+            var bookedSeats = string.IsNullOrEmpty(movie.SeatLayoutJson) 
+                ? new List<string>()
+                : System.Text.Json.JsonSerializer.Deserialize<List<string>>(movie.SeatLayoutJson);
+
+            ViewBag.BookedSeats = bookedSeats;
+            ViewBag.UserSelectedSeats = booking.SeatNumbers;
+            return View(nameof(EditBooking), movie);
+        }
+        [HttpPost]
+        [Authorize(Roles = Roles.User)]
+        public async Task<IActionResult> EditBooking(int id, List<string> SeatNumbers, int popcornQty = 0, int coldDrinkQty = 0) 
+        {
+            var userId = _userManager.GetUserId(User);
+
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.MoviePostingId == id && b.UserId == userId);
+
+            if(booking == null) return Forbid();
+            var result = await _bookingService.EditBookingAsync(id, SeatNumbers, User, popcornQty, coldDrinkQty);
+            if (!result.success)
+            {
+                TempData["Error"] = result.message;
+                return RedirectToAction(nameof(BookTicket), new { id });
+            }
+            TempData["BookingMessage"] = result.message;
+            TempData["PdfUrl"] = result.pdfUrl;
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

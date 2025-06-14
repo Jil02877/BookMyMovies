@@ -162,7 +162,7 @@ body.dark-mode footer.footer {
 
 /* Main container area */
     body.dark-mode main {
-        background-color: #141414;
+        background-color: #1e1e2f;
         color: #e5e5e5;
         box-shadow: none;
     }
@@ -369,3 +369,4 @@ body.dark-mode .movie-card {
 body.dark-mode .carousel-caption {
     background-color: rgba(255, 255, 255, 0.1);
 }
+

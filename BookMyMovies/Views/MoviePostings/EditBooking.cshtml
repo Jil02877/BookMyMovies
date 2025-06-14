@@ -1,0 +1,62 @@
+﻿@model BookMyMovies.Models.MoviePosting
+
+@{
+    ViewData["Title"] = "Edit Booking";
+    var bookedSeats = ViewBag.BookedSeats as List<string> ?? new List<string>();
+    var userSelectedSeats = (ViewBag.UserSelectedSeats as string ?? "")
+        .Split(",", StringSplitOptions.RemoveEmptyEntries)
+        .Select(s => s.Trim())
+        .ToList();
+}
+
+<h2 class="text-center m-3">Edit Your Booking for @Model.Title</h2>
+
+<div class="text-center mb-3">
+    <strong>Theater:</strong> @Model.Theater |
+    <strong>Location:</strong> @Model.Location |
+    <strong>Date:</strong> @Model.PostedDate.ToShortDateString()
+</div>
+
+<form asp-action="EditBooking" asp-route-id="@Model.Id" method="post">
+    <input type="hidden" name="id" value="@Model.Id" />
+
+    <div class="seat-selection text-center">
+        <p>Select your seat(s):</p>
+        <div class="d-flex flex-wrap justify-content-center">
+            @for (int i = 1; i <= @Model.TotalSeats; i++)
+            {
+                string seatNumber = "A" + i;
+                bool isBooked = bookedSeats.Contains(seatNumber);
+                bool isUserSeat = userSelectedSeats.Contains(seatNumber);
+
+                <label class="m-2">
+                    <input type="checkbox"
+                           name="SeatNumbers"
+                           value="@seatNumber"
+                           @(isBooked && !isUserSeat ? "disabled" : "")
+                           @(isUserSeat ? "checked" : "") />
+                    <span class="btn btn-outline-primary btn-sm @(isBooked && !isUserSeat ? "bg-secondary text-white" : isUserSeat ? "bg-success text-white" : "")">
+                        @seatNumber
+                    </span>
+                </label>
+            }
+        </div>
+    </div>
+
+    <hr />
+    <h4 class="text-center">Snacks Add-on</h4>
+    <div class="d-flex justify-content-center gap-4 my-3">
+        <div class="text-center">
+            <label for="popcornQty" class="form-label"><strong>🍿 Popcorn (₹80)</strong></label>
+            <input type="number" name="popcornQty" class="form-control text-center" id="popcornQty" min="0" value="0" />
+        </div>
+        <div class="text-center">
+            <label for="coldDrinkQty" class="form-label"><strong>🥤 Cold Drink (₹50)</strong></label>
+            <input type="number" name="coldDrinkQty" class="form-control text-center" id="coldDrinkQty" min="0" value="0" />
+        </div>
+    </div>
+
+    <div class="text-center mt-3">
+        <button type="submit" class="btn btn-warning">Update Booking</button>
+    </div>
+</form>

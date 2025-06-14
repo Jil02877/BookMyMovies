@@ -3,6 +3,7 @@ using BookMyMovies.Helpers;
 using BookMyMovies.Models;
 using BookMyMovies.Repositories;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.Json;
 
@@ -123,5 +124,54 @@ namespace BookMyMovies.Services
 
             booking.PdfPath = "/pdfs/" + pdfFileName;
         }
+
+        public async Task<(bool success, string message, string? pdfUrl)> EditBookingAsync(
+        int movieId,
+        List<string> seatNumbers,
+        ClaimsPrincipal user,
+        int popcornQty,
+        int coldDrinkQty)
+        {
+            var userId = _userManager.GetUserId(user);
+
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.MoviePostingId == movieId && b.UserId == userId);
+
+            if (booking == null)
+                return (false, "Booking not found.", null);
+
+            var movie = await _repository.GetByIdAsync(movieId);
+            if (movie == null)
+                return (false, "Movie not found.", null);
+
+            var bookedSeats = string.IsNullOrEmpty(movie.SeatLayoutJson)
+                ? new List<string>()
+                : JsonSerializer.Deserialize<List<string>>(movie.SeatLayoutJson)!;
+
+            var oldSeats = booking.SeatNumbers.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                               .Select(s => s.Trim())
+                                               .ToList();
+            bookedSeats.RemoveAll(s => oldSeats.Contains(s));
+            bookedSeats.AddRange(seatNumbers);
+
+            movie.SeatLayoutJson = JsonSerializer.Serialize(bookedSeats);
+            movie.SeatsBooked = bookedSeats.Count;
+
+            booking.SeatNumbers = string.Join(",", seatNumbers);
+            booking.SeatsBooked = seatNumbers.Count;
+            booking.PopcornQty = popcornQty;
+            booking.ColdDrinkQty = coldDrinkQty;
+
+            await _repository.UpdateAsync(movie);
+            await _context.SaveChangesAsync();
+
+            var identityUser = await _userManager.GetUserAsync(user);
+            await ProcessPostBookingAsync(booking, identityUser, movie, seatNumbers, popcornQty, coldDrinkQty);
+            await _context.SaveChangesAsync();
+
+            return (true, "Booking updated successfully.", booking.PdfPath);
+        }
+
+
     }
 }

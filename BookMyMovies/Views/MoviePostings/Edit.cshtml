@@ -3,7 +3,7 @@
 <div class="form-container">
     <h1 class="text-center mb-4">Edit Movie Posting</h1>
 
-    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+    <form asp-action="Edit" method="post" enctype="multipart/form-data" id="editForm">
         <input type="hidden" asp-for="Id" />
 
         <div class="mb-3">
@@ -65,6 +65,29 @@
         <button type="submit" class="btn btn-primary">Update Movie</button>
     </form>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded",function() {
+        var form = document.getElementById("editForm");
+        form.addEventListener("submit",function(e) {
+            e.preventDefault();
+              Swal.fire({
+                    title: 'Confirm Update?',
+                    text: "Do you want to update your booking with the selected changes?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ffc107',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, Update it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+        })
+    })
+</script>
 
 @section Scripts {
     @{

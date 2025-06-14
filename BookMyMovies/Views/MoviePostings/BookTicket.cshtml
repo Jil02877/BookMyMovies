@@ -13,7 +13,7 @@
     <strong>Date:</strong> @Model.PostedDate.ToShortDateString()
 </div>
 
-<form asp-action="BookTicket" method="post">
+<form asp-action="BookTicket" method="post" id="bookingForm">
     <input type="hidden" name="id" value="@Model.Id" />
 
     <div class="seat-selection text-center">
@@ -26,7 +26,7 @@
 
                 <label class="m-3">
                     <input type="checkbox" class=" @(isBooked ? "bg-secondary text-white" : "")" name="selectedSeats" value="@seatNumber" @(isBooked ? "disabled" : "") />
-                    <span class="btn btn-outline-primary btn-sm @(isBooked ? "disabled bg-secondary" : "")">@seatNumber</span>
+                    <span class="btn btn-outline-primary btn-sm  @(isBooked ? "disabled bg-secondary" : "")">@seatNumber</span>
                 </label>
             }
         </div>
@@ -47,3 +47,26 @@
         <button type="submit" class="btn btn-success">Confirm Booking</button>
     </div>
 </form>
+
+<script>
+    document.addEventListener("DOMContentLoaded",function() {
+         const form = document.getElementById("bookingForm");
+         form.addEventListener("submit", function(e){
+              e.preventDefault();
+               Swal.fire({
+                title: 'Confirm Booking?',
+                text: "Are you sure you want to book these seats?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Book it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit(); // Submit after confirmation
+                }
+            });
+         })
+    })
+</script>

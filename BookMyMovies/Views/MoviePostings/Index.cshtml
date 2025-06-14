@@ -106,7 +106,16 @@
 
                         @if (User.IsInRole(Roles.User))
                         {
-                            <a asp-action="BookTicket" asp-route-id="@moviePosting.Id" class="btn btn-success btn-sm w-100">Book Now</a>
+                            if (ViewBag.BookedMovieIds != null && ((List<int>)ViewBag.BookedMovieIds).Contains(moviePosting.Id))
+                            {
+                                
+                                <a asp-action="EditBooking" asp-route-id="@moviePosting.Id" class="btn btn-warning btn-sm w-100">Edit Booking</a>
+                            }
+                            else
+                            {
+                            
+                                <a asp-action="BookTicket" asp-route-id="@moviePosting.Id" class="btn btn-success btn-sm w-100">Book Now</a>
+                            }
                         }
                     </div>
                 </div>
