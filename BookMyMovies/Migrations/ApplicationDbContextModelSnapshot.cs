@@ -17,7 +17,7 @@ namespace BookMyMovies.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.5")
+                .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -33,7 +33,13 @@ namespace BookMyMovies.Migrations
                     b.Property<DateTime>("BookingDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("ColdDrinkQty")
+                        .HasColumnType("int");
+
                     b.Property<int>("MoviePostingId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MoviePostingId1")
                         .HasColumnType("int");
 
                     b.Property<string>("PaymentStatus")
@@ -43,11 +49,17 @@ namespace BookMyMovies.Migrations
                     b.Property<string>("PdfPath")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PopcornQty")
+                        .HasColumnType("int");
+
                     b.Property<string>("SeatNumbers")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SeatsBooked")
                         .HasColumnType("int");
+
+                    b.Property<float>("TotalAmount")
+                        .HasColumnType("real");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -56,6 +68,8 @@ namespace BookMyMovies.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MoviePostingId");
+
+                    b.HasIndex("MoviePostingId1");
 
                     b.HasIndex("UserId");
 
@@ -81,9 +95,6 @@ namespace BookMyMovies.Migrations
                     b.Property<bool>("IsApproved")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsSeatAvailable")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Location")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -97,7 +108,7 @@ namespace BookMyMovies.Migrations
                     b.Property<string>("SeatLayoutJson")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("SeatsAvailable")
+                    b.Property<int>("SeatsBooked")
                         .HasColumnType("int");
 
                     b.Property<string>("Theater")
@@ -329,8 +340,12 @@ namespace BookMyMovies.Migrations
                     b.HasOne("BookMyMovies.Models.MoviePosting", "MoviePosting")
                         .WithMany()
                         .HasForeignKey("MoviePostingId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("BookMyMovies.Models.MoviePosting", null)
+                        .WithMany("Bookings")
+                        .HasForeignKey("MoviePostingId1");
 
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
                         .WithMany()
@@ -403,6 +418,11 @@ namespace BookMyMovies.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("BookMyMovies.Models.MoviePosting", b =>
+                {
+                    b.Navigation("Bookings");
                 });
 #pragma warning restore 612, 618
         }

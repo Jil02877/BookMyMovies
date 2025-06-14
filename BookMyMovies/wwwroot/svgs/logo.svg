@@ -1,0 +1,32 @@
+﻿<!-- BookMyMovies SVG Logo - Continuous Text with Styled "My" -->
+<svg width="360" height="80" viewBox="0 0 360 80" xmlns="http://www.w3.org/2000/svg">
+	<style>
+		.text { font-family: 'Segoe UI', sans-serif; font-weight: bold; }
+	</style>
+
+	<!-- Background -->
+	<rect width="360" height="80" fill="white"/>
+
+	<!-- "Book" Text -->
+	<text x="10" y="50" font-size="36" class="text" fill="#222" id="book">Book</text>
+
+	<!-- Calculate width of "Book" text (~92px), align ticket right after -->
+	<!-- Ticket Shape for "My" -->
+	<g transform="translate(102,10)">
+		<!-- Ticket Body -->
+		<rect x="0" y="0" width="66" height="60" fill="#E50914"/>
+
+		<!-- Notches for ticket effect -->
+		<circle cx="0" cy="15" r="6" fill="white"/>
+		<circle cx="0" cy="45" r="6" fill="white"/>
+		<circle cx="66" cy="15" r="6" fill="white"/>
+		<circle cx="66" cy="45" r="6" fill="white"/>
+
+		<!-- "My" Text -->
+		<text x="12" y="42" font-size="30" class="text" fill="white">My</text>
+	</g>
+
+	<!-- "Movies" Text directly touching ticket -->
+	<!-- Ticket ends at 102 + 66 = 168, start Movies at 168 -->
+	<text x="168" y="50" font-size="36" class="text" fill="#222" id="movies">Movies</text>
+</svg>

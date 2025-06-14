@@ -32,16 +32,44 @@ namespace BookMyMovies.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            if(User.IsInRole(Roles.Employer))
+            if(User.IsInRole(Roles.Admin) || User.IsInRole(Roles.Employer)) 
             {
                 var allMoviePostings = await _repository.GetAllAsync();
                 var userId = _userManager.GetUserId(User);
-                var filterdMoviePostings = allMoviePostings.Where(mp => mp.UserId == userId);
-                return View(filterdMoviePostings);
+                var filteredMoviePostings = allMoviePostings
+                    .Where(mp => mp.UserId == userId)
+                    .OrderByDescending(mp => mp.PostedDate);
+
+                return View(filteredMoviePostings);
+
             }
-            var moviePostings = await _repository.GetAllAsync();
-            return View(moviePostings);
+            if (User.IsInRole(Roles.User))
+            {
+                var allMoviePostings = await _repository.GetAllAsync();
+                var sorted = allMoviePostings.OrderByDescending(mp => mp.PostedDate); 
+                return View(sorted);
+            }
+
+            var latest3Movies = await _repository.GetAllAsync();
+            var result = latest3Movies
+                .OrderByDescending(mp => mp.PostedDate)
+                .Take(3);
+
+            return View(result);
         }
+
+        [AllowAnonymous]
+        public async Task<IActionResult> Details(int id)
+        {
+            var movie = await _repository.GetByIdAsync(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
+            return View(movie);
+        }
+
         [Authorize(Roles = "Admin,Employer")]
         public IActionResult Create()
         {
@@ -50,42 +78,40 @@ namespace BookMyMovies.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin,Employer")]
-        public async Task<IActionResult> Create(MoviePostingViewModel moviePostingVm)
+        public async Task<IActionResult> Create(CreateMoviePostingViewModel vm)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(vm);
+
+            string uniqueFileName = null;
+
+            if (vm.ImageFile != null)
             {
-                string uniqueFileName = null;
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+                uniqueFileName = Guid.NewGuid() + "_" + vm.ImageFile.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                if (moviePostingVm.ImageFile != null)
+                using (var fs = new FileStream(filePath, FileMode.Create))
                 {
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
-                    uniqueFileName = Guid.NewGuid().ToString() + "_" + moviePostingVm.ImageFile.FileName;
-                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await moviePostingVm.ImageFile.CopyToAsync(fileStream);
-                    }
+                    await vm.ImageFile.CopyToAsync(fs);
                 }
-
-                var moviePosting = new MoviePosting
-                {
-                    Title = moviePostingVm.Title,
-                    Description = moviePostingVm.Description,
-                    Theater = moviePostingVm.Theater,
-                    Location = moviePostingVm.Location,
-                    SeatsAvailable = moviePostingVm.SeatsAvailable,
-                    TotalSeats = moviePostingVm.TotalSeats,
-                    UserId = _userManager.GetUserId(User),
-                    ImageUrl = uniqueFileName != null ? "/images/" + uniqueFileName : null,
-                    Price = moviePostingVm.Price
-                };
-
-                await _repository.AddAsync(moviePosting);
-                return RedirectToAction(nameof(Index));
             }
 
-            return View(moviePostingVm);
+            var movie = new MoviePosting
+            {
+                Title = vm.Title,
+                Description = vm.Description,
+                Theater = vm.Theater,
+                Location = vm.Location,
+                SeatsBooked = 0,
+                TotalSeats = vm.TotalSeats,
+                Price = vm.Price,
+                ImageUrl = "/images/" + uniqueFileName,
+                UserId = _userManager.GetUserId(User),
+            };
+
+            await _repository.AddAsync(movie);
+            return RedirectToAction(nameof(Index));
         }
 
 
@@ -126,9 +152,9 @@ namespace BookMyMovies.Controllers
 
         [HttpPost]
         [Authorize(Roles = Roles.User)]
-        public async Task<IActionResult> BookTicket(int id,List<string> selectedSeats)
+        public async Task<IActionResult> BookTicket(int id,List<string> selectedSeats, int popcornQty = 0, int coldDrinkQty = 0)
         {
-            var result = await _bookingService.BookTicketsAsync(id, selectedSeats, User);
+            var result = await _bookingService.BookTicketsAsync(id, selectedSeats, User, popcornQty, coldDrinkQty);
             if (!result.success)
             {
                 TempData["Error"] = result.message;
@@ -138,6 +164,76 @@ namespace BookMyMovies.Controllers
             TempData["BookingMessage"] = result.message;
             TempData["PDFTicketPath"] = result.pdfUrl;
 
+            return RedirectToAction(nameof(BookTicket), new { id });
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin,Employer")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var movie = await _repository.GetByIdAsync(id);
+            if (movie == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            if (!User.IsInRole(Roles.Admin) && movie.UserId != userId) return Forbid();
+
+            var vm = new EditMoviePostingViewModel
+            {
+                Id = movie.Id,
+                Title = movie.Title,
+                Description = movie.Description,
+                Theater = movie.Theater,
+                Location = movie.Location,
+                TotalSeats = movie.TotalSeats,
+                Price = movie.Price,
+                ExistingImageUrl = movie.ImageUrl,
+                SeatsBooked = movie.TotalSeats - movie.SeatsAvailable
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin,Employer")]
+        public async Task<IActionResult> Edit(int id, EditMoviePostingViewModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                var existingMovie = await _repository.GetByIdAsync(id);
+                vm.ExistingImageUrl = existingMovie?.ImageUrl;
+                return View(vm);
+            }
+
+            var movie = await _repository.GetByIdAsync(id);
+            if (movie == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            if (!User.IsInRole(Roles.Admin) && movie.UserId != userId) return Forbid();
+
+            movie.Title = vm.Title;
+            movie.Description = vm.Description;
+            movie.Theater = vm.Theater;
+            movie.Location = vm.Location;
+            int bookedSeats = movie.SeatsBooked;
+            movie.TotalSeats = vm.TotalSeats;
+            movie.SeatsBooked = bookedSeats;
+            movie.Price = vm.Price;
+
+            if (vm.ImageFile != null)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+                var uniqueFileName = Guid.NewGuid() + "_" + vm.ImageFile.FileName;
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fs = new FileStream(filePath, FileMode.Create))
+                {
+                    await vm.ImageFile.CopyToAsync(fs);
+                }
+
+                movie.ImageUrl = "/images/" + uniqueFileName;
+            }
+
+            await _repository.UpdateAsync(movie);
             return RedirectToAction(nameof(Index));
         }
 

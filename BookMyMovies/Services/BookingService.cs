@@ -30,7 +30,12 @@ namespace BookMyMovies.Services
             _context = context;
         }
 
-        public async Task<(bool success, string message, string? pdfUrl)> BookTicketsAsync(int movieId, List<string> selectedSeats, ClaimsPrincipal user)
+        public async Task<(bool success, string message, string? pdfUrl)> BookTicketsAsync(
+            int movieId,
+            List<string> selectedSeats,
+            ClaimsPrincipal user,
+            int popcornQty = 0,
+            int coldDrinkQty = 0 )
         {
             var movie = await _repository.GetByIdAsync(movieId);
             if (movie == null) return (false, "Movie not found", null);
@@ -40,59 +45,75 @@ namespace BookMyMovies.Services
                 : JsonSerializer.Deserialize<List<string>>(movie.SeatLayoutJson);
 
             bookedSeats.AddRange(selectedSeats);
-            bookedSeats = bookedSeats.Distinct().ToList();
-
             movie.SeatLayoutJson = JsonSerializer.Serialize(bookedSeats);
-            movie.SeatsAvailable = movie.TotalSeats - bookedSeats.Count;
-            movie.IsSeatAvailable = movie.SeatsAvailable > 0;
+            movie.SeatsBooked = bookedSeats.Count;
+
 
             var userId = _userManager.GetUserId(user);
             var identityUser = await _userManager.GetUserAsync(user);
+
+            float ticketTotal = selectedSeats.Count * movie.Price;
+            float popcornTotal = popcornQty * 80;       // ₹80 per popcorn
+            float coldDrinkTotal = coldDrinkQty * 50;   // ₹50 per cold drink
+            float totalAmount = ticketTotal + popcornTotal + coldDrinkTotal;
+
             var booking = new Booking
             {
                 UserId = userId,
                 MoviePostingId = movie.Id,
                 BookingDate = DateTime.UtcNow,
                 PaymentStatus = "Paid",
-                SeatNumbers = string.Join(", ", selectedSeats)
+                SeatNumbers = string.Join(", ", selectedSeats),
+                SeatsBooked = selectedSeats.Count,
+                PopcornQty = popcornQty,
+                ColdDrinkQty = coldDrinkQty,
+                TotalAmount = totalAmount
             };
 
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();
 
-            // Process post-booking (QR + PDF + Email)
-            await ProcessPostBookingAsync(booking, identityUser, movie, selectedSeats);
+            await ProcessPostBookingAsync(booking, identityUser, movie, selectedSeats, popcornQty, coldDrinkQty);
 
-            // Save PDF path update
             await _context.SaveChangesAsync();
             await _repository.UpdateAsync(movie);
 
             return (true, $"Successfully booked {selectedSeats.Count} seats", booking.PdfPath);
         }
 
-        public async Task ProcessPostBookingAsync(Booking booking, IdentityUser user, MoviePosting movie, List<string> selectedSeats)
+        public async Task ProcessPostBookingAsync(
+            Booking booking,
+            IdentityUser user,
+            MoviePosting movie,
+            List<string> selectedSeats,
+            int popcornQty = 0,
+            int coldDrinkQty = 0)
         {
             var email = await _userManager.GetEmailAsync(user);
             int seatCount = selectedSeats.Count;
-            float totalAmount = seatCount * movie.Price;
+            float ticketAmount = seatCount * movie.Price;
+            float popcornAmount = popcornQty * 80;
+            float coldDrinkAmount = coldDrinkQty * 50;
+            float totalAmount = ticketAmount + popcornAmount + coldDrinkAmount;
             var seats = string.Join(", ", selectedSeats);
 
             string body = $@"
                 <h2>Ticket Confirmation</h2>
                 <p>Hi {user.UserName},</p>
                 <p>You have successfully booked <strong>{seatCount}</strong> ticket(s) for the movie: <strong>{movie.Title}</strong>.</p>
-                <p><strong>Total Amount Paid:</strong> ₹{totalAmount}</p>
                 <p><strong>Seats:</strong> {seats}</p>
+                <p><strong>Snacks Ordered:</strong><br />
+                🍿 Popcorn: {popcornQty} × ₹80 = ₹{popcornAmount}<br />
+                🥤 Cold Drink: {coldDrinkQty} × ₹50 = ₹{coldDrinkAmount}</p>
+                <p><strong>Total Amount Paid:</strong> ₹{totalAmount}</p>
                 <p><strong>Location:</strong> {movie.Theater}, {movie.Location}</p>
                 <p><em>Thank you for booking with BookMyMovies!</em></p>";
 
             await _emailService.SendEmailAsync(email, "🎟 Ticket Booked - BookMyMovies", body);
 
-            // Generate QR
             var qrData = $"User: {user.UserName}, Movie: {movie.Title}, Seats: {seats}";
             var qrCodeImage = QRHelper.GenerateQrCode(qrData);
 
-            // Generate PDF
             var pdfBytes = PDFHelper.GenerateBookingPdf(user.UserName, movie.Title, seats, movie.Location, qrCodeImage);
             var pdfFileName = $"Ticket_{booking.Id}.pdf";
 

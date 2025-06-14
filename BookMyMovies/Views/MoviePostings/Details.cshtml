@@ -1,0 +1,31 @@
+﻿@model BookMyMovies.Models.MoviePosting
+@using BookMyMovies.Constants;
+@{
+    ViewData["Title"] = "Movie Details";
+}
+
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="card shadow-lg p-4 movie-detail-card" style="max-width: 700px; width: 100%;">
+        <img src="@Model.ImageUrl"
+             class="card-img-top mx-auto d-block mb-4 rounded"
+             style="width: 222.39px; height: 378.06px; object-fit: cover;"
+             alt="@Model.Title" />
+
+        <div class="card-body text-center">
+            <h2 class="card-title fw-bold">@Model.Title</h2>
+            <p class="card-text text-muted mt-2">@Model.Description</p>
+            <ul class="list-unstyled text-start mt-4">
+                <li><strong>Theater:</strong> @Model.Theater</li>
+                <li><strong>Location:</strong> @Model.Location</li>
+                <li><strong>Posted Date:</strong> @Model.PostedDate.ToString("dd MMM yyyy")</li>
+                <li><strong>Seats Available:</strong> @Model.SeatsAvailable / @Model.TotalSeats</li>
+                <li><strong>Price:</strong> ₹@Model.Price</li>
+            </ul>
+
+            @if (Model.IsSeatAvailable && User.IsInRole(Roles.User))
+            {
+                <a asp-action="BookTicket" asp-route-id="@Model.Id" class="btn btn-success mt-4 w-100 shadow-sm">🎟️ Book Now</a>
+            }
+        </div>
+    </div>
+</div>

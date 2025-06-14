@@ -26,12 +26,23 @@
 
                 <label class="m-3">
                     <input type="checkbox" class=" @(isBooked ? "bg-secondary text-white" : "")" name="selectedSeats" value="@seatNumber" @(isBooked ? "disabled" : "") />
-                    <span class="btn btn-outline-primary btn-sm @(isBooked ? "disabled" : "")">@seatNumber</span>
+                    <span class="btn btn-outline-primary btn-sm @(isBooked ? "disabled bg-secondary" : "")">@seatNumber</span>
                 </label>
             }
         </div>
     </div>
-
+    <hr />
+    <h4 class="text-center">Snacks Add-on</h4>
+    <div class="d-flex justify-content-center gap-4 my-3">
+        <div class="text-center">
+            <label for="popcornQty" class="form-label"><strong>🍿 Popcorn (₹80)</strong></label>
+            <input type="number" name="popcornQty" class="form-control text-center" id="popcornQty" min="0" value="0" />
+        </div>
+        <div class="text-center">
+            <label for="coldDrinkQty" class="form-label"><strong>🥤 Cold Drink (₹50)</strong></label>
+            <input type="number" class="form-control text-center" name="coldDrinkQty" id="coldDrinkQty" min="0" value="0" />
+        </div>
+    </div>
     <div class="text-center mt-3">
         <button type="submit" class="btn btn-success">Confirm Booking</button>
     </div>

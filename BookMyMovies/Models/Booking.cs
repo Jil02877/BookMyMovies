@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Identity;
-
+    
 namespace BookMyMovies.Models
 {
     public class Booking
@@ -21,7 +21,7 @@ namespace BookMyMovies.Models
         [ForeignKey(nameof(MoviePostingId))]
         public MoviePosting MoviePosting { get; set; }
 
-     
+
         public int SeatsBooked { get; set; }
 
         [Required]
@@ -32,5 +32,9 @@ namespace BookMyMovies.Models
         public string? SeatNumbers { get; set; } // Optional: store "A1,A2,A3"
 
         public string? PdfPath { get; set; }
+
+        public int PopcornQty { get; set; } = 0;
+        public int ColdDrinkQty { get; set; } = 0;
+        public float TotalAmount { get; set; } = 0.0f;
     }
 }

@@ -32,11 +32,17 @@ namespace BookMyMovies.Models
 
         public bool IsApproved { get; set; }
 
-        public bool IsSeatAvailable { get; set; } = true;
+        public int SeatsBooked { get; set; } = 0;
 
-        public int SeatsAvailable { get; set; } 
 
+        [Required]
         public int TotalSeats { get; set; }
+
+        [NotMapped]
+        public int SeatsAvailable => TotalSeats - SeatsBooked; 
+
+        [NotMapped]
+        public bool IsSeatAvailable => SeatsAvailable > 0; 
 
         public string? SeatLayoutJson { get; set; }
 
@@ -47,5 +53,7 @@ namespace BookMyMovies.Models
 
         [ForeignKey(nameof(UserId))]
         public IdentityUser User { get; set; }
+
+        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     }
 }

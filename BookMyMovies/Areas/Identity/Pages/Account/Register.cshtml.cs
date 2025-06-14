@@ -67,7 +67,7 @@ namespace BookMyMovies.Areas.Identity.Pages.Account
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
-        public IList<AuthenticationScheme> ExternalLogins { get; set; }
+            public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -134,7 +134,14 @@ namespace BookMyMovies.Areas.Identity.Pages.Account
                         await _roleManager.CreateAsync(new IdentityRole("User"));
                     }
 
-                    await _userManager.AddToRoleAsync(user, "User");
+                    if (!await _roleManager.RoleExistsAsync(Roles.Employer))
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(Roles.Employer));
+                    }
+                    if (Input.IsUser)
+                       await _userManager.AddToRoleAsync(user, Roles.User);
+                    else
+                        await _userManager.AddToRoleAsync(user, Roles.Employer);
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

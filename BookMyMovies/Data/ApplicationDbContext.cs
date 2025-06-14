@@ -23,7 +23,7 @@ namespace BookMyMovies.Data
                 .HasOne(b => b.MoviePosting)
                 .WithMany()
                 .HasForeignKey(b => b.MoviePostingId)
-                .OnDelete(DeleteBehavior.Restrict);  // <- restrict to avoid cascade
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.User)

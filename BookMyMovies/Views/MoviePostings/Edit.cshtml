@@ -1,0 +1,73 @@
+﻿@model BookMyMovies.ViewModels.EditMoviePostingViewModel
+
+<div class="form-container">
+    <h1 class="text-center mb-4">Edit Movie Posting</h1>
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Theater" class="form-label"></label>
+            <input asp-for="Theater" class="form-control" />
+            <span asp-validation-for="Theater" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Location" class="form-label"></label>
+            <input asp-for="Location" class="form-control" />
+            <span asp-validation-for="Location" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="TotalSeats" class="form-label"></label>
+            <input asp-for="TotalSeats" class="form-control" type="number" />
+            <span asp-validation-for="TotalSeats" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Seats Booked</label>
+            <input class="form-control" type="number" value="@Model.SeatsBooked" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Seats Available</label>
+            <input class="form-control" type="number" value="@(Model.TotalSeats - Model.SeatsBooked)" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Price" class="form-label"></label>
+            <input asp-for="Price" class="form-control" type="number" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ImageFile" class="form-label"></label>
+            <input asp-for="ImageFile" class="form-control" type="file" />
+            @if (!string.IsNullOrEmpty(Model.ExistingImageUrl))
+            {
+                <p>Current Image:</p>
+                <img src="@Model.ExistingImageUrl" alt="Movie Poster" width="200" />
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Movie</button>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

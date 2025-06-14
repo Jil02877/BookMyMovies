@@ -1,182 +1,371 @@
+/* General Page Styling */
+
 html {
-  font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-@media (min-width: 768px) {
-  html {
+body {
+    background-color: #f2f3f5; /* fallback light-gray */
+    font-family: 'Roboto', sans-serif;
     font-size: 16px;
-  }
+    line-height: 1.6;
+    color: #212529;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+/* Header Styling */
+header {
+    background-color: #ffffff !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    z-index: 1000;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  margin-bottom: 60px;
-}
-
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
-}
-
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
-}
-
-/* General Styles */
-body {
-    background: linear-gradient(to right, #6a11cb, #2575fc);
-    color: #333;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-h1, h2, h3 {
-    font-weight: 600;
-    color: #222;
-}
-
-.container {
-    padding-bottom: 2rem;
-}
-
-a {
-    text-decoration: none;
-}
-
-/* Navbar */
-.navbar {
-    background-color: white !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.navbar-brand {
-    font-weight: bold;
-    color: #2575fc !important;
-}
-
-.nav-link {
-    color: #333 !important;
+/* Navbar Text */
+.navbar .nav-link {
     font-weight: 500;
+    transition: color 0.3s ease;
 }
 
-    .nav-link:hover {
-        color: #2575fc !important;
-    }
+.navbar .nav-link:hover {
+        color: #0d6efd; /* Bootstrap primary */
+}
+
+/* Footer Styling */
+footer.footer {
+    background-color: #ffffff;
+    padding: 1rem ;
+    font-size: 0.9rem;
+    border-top: 1px solid #dee2e6;
+    text-align: center;
+    margin-top:auto;
+    width: 100%;
+}
+
+/* Main Section Background */
+main {
+    background-color: #f8f9fa;
+    padding: 2rem;
+    border-radius: 10px;
+}
+
+/* Cards (e.g., Movies) */
+.card {
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out, box-shadow 0.3s;
+    background-color: #ffffff;
+}
+
+.card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    color: #1e1e1e;
+}
+
+/* Movie Poster Images */
+.movie-poster {
+    height: 300px;
+    object-fit: cover;
+}
 
 /* Buttons */
+.btn-primary, .btn-success, .btn-outline-danger {
+    border-radius: 50px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: #fff;
+}
+
 .btn {
-    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 30px;
 }
 
-.btn-primary {
-    background-color: #2575fc;
-    border-color: #2575fc;
-}
 
-    .btn-primary:hover {
-        background-color: #1f5fca;
-        border-color: #1f5fca;
-    }
-
-.btn-danger {
-    background-color: #dc3545;
+.btn-sm {
+    font-size: 0.85rem;
 }
 
 .btn-success {
-    background-color: #28a745;
+    background-color: #ec5e71;
+    border: none;
 }
 
-/* Form Styling */
-.form-label {
+.btn-success:hover {
+        background-color: #e94359;
+}
+
+/* "More" Button for Description (future-proof) */
+.read-more-btn {
+    color: #0d6efd;
+    cursor: pointer;
     font-weight: 500;
 }
 
-input.form-control,
-textarea.form-control,
-select.form-control {
-    border-radius: 0.4rem;
-    box-shadow: none;
-    border: 1px solid #ccc;
+/* Responsive Improvements */
+@media (max-width: 768px) {
+    main {
+        padding: 1rem;
+    }
 }
 
-    input.form-control:focus,
-    textarea.form-control:focus {
-        border-color: #2575fc;
-        box-shadow: 0 0 5px rgba(37, 117, 252, 0.5);
-    }
-
-/* Movie Listing */
-.list-group-item {
-    margin-bottom: 1rem;
-    border-radius: 0.5rem;
-    background: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #000;
 }
 
-    .list-group-item img {
-        max-width: 100%;
-        border-radius: 0.5rem;
-    }
-
-/* BookTicket Seat Selection */
-.seat-selection {
-    background: #fff;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 2rem;
+.card-text {
+    font-size: 0.95rem;
+    color: #444;
 }
 
-    .seat-selection input[type="checkbox"] {
-        display: none;
-    }
-
-    .seat-selection label {
-        margin: 5px;
-        display: inline-block;
-        position: relative;
-        cursor: pointer;
-    }
-
-    .seat-selection span.btn {
-        pointer-events: none;
-        width: 50px;
-        height: 40px;
-    }
-
-    .seat-selection input[type="checkbox"]:checked + span.btn {
-        background-color: #2575fc;
-        color: white;
-        border-color: #2575fc;
-    }
-
-    .seat-selection input[type="checkbox"]:disabled + span.btn {
-        background-color: #ccc;
-        color: white;
-        pointer-events: none;
-    }
-
-/* Footer */
-footer.footer {
-    padding: 0.5rem 0;
-    background: white;
-    text-align: center;
-    border-top: 1px solid #ddd;
+ul.list-unstyled li {
     font-size: 0.9rem;
+    margin-bottom: 0.4rem;
 }
 
-.movie-poster {
-    height: 250px;
-    width: 100%;
+button[data-state] svg {
+    vertical-align: middle;
+    margin-left: 4px;
+}
+
+/* ===================== DARK MODE ===================== */
+
+body.dark-mode {
+    background-color: #141414; /* Netflix-style deep black */
+    color: #e5e5e5;
+}
+
+body.dark-mode header,
+body.dark-mode .navbar {
+    background-color: #1c1c1c !important;
+    border-bottom: 1px solid #2c2c2c;
+}
+
+body.dark-mode footer.footer {
+    background-color: #1c1c1c;
+    color: #b3b3b3;
+    border-top: 1px solid #2c2c2c;
+}
+
+/* Main container area */
+    body.dark-mode main {
+        background-color: #141414;
+        color: #e5e5e5;
+        box-shadow: none;
+    }
+
+/* Navbar links */
+body.dark-mode .nav-link {
+    color: #e5e5e5 !important;
+}
+
+body.dark-mode .nav-link:hover {
+        color: #e50914 !important; /* Netflix red */
+}
+
+/* Dropdown Menu */
+body.dark-mode .dropdown-menu {
+        background-color: #2a2a2a;
+        border: none;
+}
+
+body.dark-mode .dropdown-item {
+        color: #e5e5e5;
+        background-color: transparent;
+
+}
+
+body.dark-mode .dropdown-item:hover {
+            background-color: #383838;
+}
+
+/* Cards */
+body.dark-mode .card {
+        background-color: #1e1e1e;
+        color: #f5f5f5;
+        border: 1px solid #2e2e2e;
+}
+
+body.dark-mode .card-title {
+        color: #fff;
+}
+
+body.dark-mode .card-text {
+        color: #ccc;
+}
+
+/* Buttons */
+body.dark-mode .btn-primary,
+body.dark-mode .btn-success {
+        background-color: #e50914;
+        border-color: #e50914;
+        color: #fff;
+}
+
+body.dark-mode .btn-primary:hover,
+body.dark-mode .btn-success:hover {
+            background-color: #b20710;
+            border-color: #b20710;
+}
+
+body.dark-mode .btn-outline-danger {
+        color: #e50914;
+        border-color: #e50914;
+}
+
+body.dark-mode .btn-outline-danger:hover {
+            background-color: #e50914;
+            color: #fff;
+}
+
+    /* Read More Button */
+body.dark-mode .read-more-btn {
+        color: #e50914;
+}
+
+/* Theme Toggle Icons */
+body.dark-mode .bi-sun-fill {
+        color: #fdd835;
+}
+
+body.dark-mode .bi-moon-stars-fill {
+        color: #fff;
+}
+
+
+    body.dark-mode .form-check-label {
+        color: #ffffff;
+    }
+
+    body.dark-mode h1,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode h4,
+    body.dark-mode h5,
+    body.dark-mode h6 {
+        color: #ffffff;
+    }
+
+ body,
+ header,
+ footer,
+ main,
+ .navbar,
+ .card {
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+audio {
+    display: none;
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+body.dark-mode .form-container {
+    background-color: #1e1e2f;
+    color: #f0f0f0;
+}
+
+body.dark-mode .form-control {
+    background-color: #2c2c3e;
+    color: #fff;
+    border: 1px solid #444;
+}
+
+    body.dark-mode .form-control::placeholder {
+        color: #aaa;
+    }
+
+body.dark-mode .form-label {
+    color: #ddd;
+}
+
+body.dark-mode .text-danger {
+    color: #ff6b6b;
+}
+
+body.dark-mode .form-container,
+body.dark-mode .form-control,
+body.dark-mode .form-label {
+    transition: background-color 0.3s, color 0.3s;
+}
+
+/* ==== SLIDER STYLES ==== */
+#movieCarousel .carousel-inner {
+    height: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#movieCarousel img {
+    height: 378.06px;
+    width: 222.39px;
     object-fit: cover;
-    border-top-left-radius: 0.75rem;
-    border-top-right-radius: 0.75rem;
+    margin: 0 auto;
+    border-radius: 10px;
+    transition: transform 0.4s ease-in-out;
+}
+
+#movieCarousel .carousel-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+}
+
+#movieCarousel .carousel-caption {
+    max-width: 90%;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px 20px;
+    border-radius: 8px;
+}
+
+/* ==== CARD STYLES ==== */
+.movie-card img.movie-poster {
+    width: 222.39px;
+    height: 378.06px;
+    object-fit: cover;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.movie-card {
+    padding: 10px;
+    background-color: var(--bs-card-bg, #fff);
+    transition: transform 0.3s ease-in-out;
+}
+
+    .movie-card:hover {
+        transform: scale(1.03);
+    }
+
+/* ==== DARK MODE (OPTIONAL) ==== */
+body.dark-mode .movie-card {
+    background-color: #1c1c1c;
+    color: #f0f0f0;
+}
+
+body.dark-mode .carousel-caption {
+    background-color: rgba(255, 255, 255, 0.1);
 }
