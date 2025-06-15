@@ -66,32 +66,46 @@
     </form>
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded",function() {
-        var form = document.getElementById("editForm");
-        form.addEventListener("submit",function(e) {
-            e.preventDefault();
-           Swal.fire({
-                title: 'Are you sure?',
-                text: "Do you want to update the movie details?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, update it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit(); // Proceed to submit form
-                }
-            });
-        })
-    })
-</script>
-
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var form = document.getElementById("editForm");
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault(); // Stop form submit until confirmed
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you want to update the movie details?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, update it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Updating Movie...',
+                            html: `
+                                <img src="/images/movie-loader.gif" alt="Loading..." width="150" class="mb-3" />
+                                <br/>Please wait while we apply your changes.
+                            `,
+                            showConfirmButton: false,
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        setTimeout(() => {
+                            form.submit(); // Submit after delay
+                        }, 1500);
+                    }
+                });
+            });
+        });
+    </script>
 }

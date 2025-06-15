@@ -44,29 +44,51 @@
         </div>
     </div>
     <div class="text-center mt-3">
-        <button type="submit" class="btn btn-success">Confirm Booking</button>
+        <button type="submit" onclick="showBookingLoader()" class="btn btn-success">Confirm Booking</button>
     </div>
 </form>
 
-<script>
-    document.addEventListener("DOMContentLoaded",function() {
-         const form = document.getElementById("bookingForm");
-         form.addEventListener("submit", function(e){
-              e.preventDefault();
-               Swal.fire({
-                title: 'Confirm Booking?',
-                text: "Are you sure you want to update seats?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, Book it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit(); // Submit after confirmation
-                }
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("bookingForm");
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault(); // prevent normal form submission
+
+                Swal.fire({
+                    title: 'Confirm Booking?',
+                    text: "Are you sure you want to book these seats?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, Book it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Show loader with GIF
+                        Swal.fire({
+                            title: 'Booking in progress...',
+                            html: `
+                                <img src="/images/movie-loader.gif" alt="Loading..." width="150" class="mb-3" />
+                                <br/>Please wait while we reserve your seats.
+                            `,
+                            showConfirmButton: false,
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+
+                        // Submit after short delay
+                        setTimeout(() => {
+                            form.submit();
+                        }, 1500);
+                    }
+                });
             });
-         })
-    })
-</script>
+        });
+    </script>
+}

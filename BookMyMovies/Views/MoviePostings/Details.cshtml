@@ -24,7 +24,7 @@
 
             @if (Model.IsSeatAvailable && User.IsInRole(Roles.User))
             {
-                <a asp-action="BookTicket" asp-route-id="@Model.Id" class="btn btn-success mt-4 w-100 shadow-sm">🎟️ Book Now</a>
+                <a asp-action="BookTicket" asp-route-id="@Model.Id" class="btn btn-success mt-4 w-100 shadow-sm">Book Now</a>
             }
         </div>
     </div>
