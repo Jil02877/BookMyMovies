@@ -239,6 +239,7 @@ namespace BookMyMovies.Controllers
             }
 
             await _repository.UpdateAsync(movie);
+            TempData["SuccessMessage"] = "Movie updated successfully!";
             return RedirectToAction(nameof(Index));
         }
 

@@ -17,7 +17,7 @@
     <strong>Date:</strong> @Model.PostedDate.ToShortDateString()
 </div>
 
-<form asp-action="EditBooking" asp-route-id="@Model.Id" method="post">
+<form asp-action="EditBooking" asp-route-id="@Model.Id" method="post" id="editBooking">
     <input type="hidden" name="id" value="@Model.Id" />
 
     <div class="seat-selection text-center">
@@ -60,3 +60,25 @@
         <button type="submit" class="btn btn-warning">Update Booking</button>
     </div>
 </form>
+
+<script>
+    document.addEventListener("DOMContentLoaded",function() {
+		const form = document.getElementById("editBooking");
+        form.addEventListener("submit", function(e){
+            e.preventDefault();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to update?",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, update it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit(); // Proceed to submit form
+                }
+            });
+        })
+    })
+</script>
