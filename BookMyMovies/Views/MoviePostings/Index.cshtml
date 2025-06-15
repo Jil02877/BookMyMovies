@@ -5,7 +5,7 @@
     @if (!User.IsInRole(Roles.Employer) && !User.IsInRole(Roles.Admin))
     {
         var latestMovies = Model.Take(3).ToList();
-        <div id="movieCarousel" class="carousel slide mb-5 shadow-sm rounded" data-bs-ride="carousel" data-bs-interval="3000">
+        <div id="movieCarousel" class="carousel slide carousel-fade mb-5 shadow-sm rounded" data-bs-ride="carousel" data-bs-interval="3000">
             <div class="carousel-inner">
                 @for (int i = 0; i < latestMovies.Count; i++)
                 {
@@ -193,6 +193,18 @@
         }
 
 
+    </script>
+
+    <script>
+        const movieCarousel = document.querySelector('#movieCarousel');
+        if (movieCarousel) {
+            new bootstrap.Carousel(movieCarousel, {
+                interval: 3000,
+                ride: 'carousel',
+                wrap: true,
+                pause: 'hover'
+            });
+        }
     </script>
 
     @if (TempData["BookingMessage"] != null)
