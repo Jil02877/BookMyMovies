@@ -9,6 +9,7 @@ namespace BookMyMovies.Data
     {
         public DbSet<MoviePosting> MoviePostings { get; set; }
         public DbSet<Booking> Bookings { get; set; }
+        public DbSet<BookingNotification> BookingNotifications { get; set; }
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
 
         {
@@ -23,14 +24,27 @@ namespace BookMyMovies.Data
                 .HasOne(b => b.MoviePosting)
                 .WithMany()
                 .HasForeignKey(b => b.MoviePostingId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade); // ✅ Keep cascade here
 
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.User)
                 .WithMany()
                 .HasForeignKey(b => b.UserId)
-                .OnDelete(DeleteBehavior.Restrict);  // <- restrict this too
+                .OnDelete(DeleteBehavior.Restrict); // ✅ Already correct
+
+            modelBuilder.Entity<BookingNotification>()
+                 .HasOne(n => n.MoviePosting)
+                 .WithMany()
+                 .HasForeignKey(n => n.MoviePostingId)
+                 .OnDelete(DeleteBehavior.Restrict); // FIX: Prevent second cascade
+
+            modelBuilder.Entity<BookingNotification>()
+                .HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Restrict); // Optional: also safe
         }
+
 
     }
 }

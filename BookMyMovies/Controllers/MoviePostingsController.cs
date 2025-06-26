@@ -202,7 +202,8 @@ namespace BookMyMovies.Controllers
                 TotalSeats = movie.TotalSeats,
                 Price = movie.Price,
                 ExistingImageUrl = movie.ImageUrl,
-                SeatsBooked = movie.TotalSeats - movie.SeatsAvailable
+                SeatsBooked = movie.TotalSeats - movie.SeatsAvailable,
+                IsBookingOpen = movie.IsBookingOpen
             };
 
             return View(vm);
@@ -225,6 +226,25 @@ namespace BookMyMovies.Controllers
             var userId = _userManager.GetUserId(User);
             if (!User.IsInRole(Roles.Admin) && movie.UserId != userId) return Forbid();
 
+            // 👉 Add this block BEFORE updating the movie
+            if (vm.IsBookingOpen && !movie.IsBookingOpen)
+            {
+                var subscribedUsers = await _context.BookingNotifications
+                    .Where(n => n.MoviePostingId == movie.Id)
+                    .Include(n => n.User)
+                    .ToListAsync();
+
+                foreach (var subscriber in subscribedUsers)
+                {
+                    var email = await _userManager.GetEmailAsync(subscriber.User);
+                    await _emailService.SendEmailAsync(email,
+                        $"🎬 Booking Now Open: {movie.Title}",
+                        $"Hi, Booking for <strong>{movie.Title}</strong> is now open! Hurry and book your seats.");
+                }
+
+                _context.BookingNotifications.RemoveRange(subscribedUsers);
+            }
+         
             movie.Title = vm.Title;
             movie.Description = vm.Description;
             movie.Theater = vm.Theater;
@@ -233,6 +253,7 @@ namespace BookMyMovies.Controllers
             movie.TotalSeats = vm.TotalSeats;
             movie.SeatsBooked = bookedSeats;
             movie.Price = vm.Price;
+            movie.IsBookingOpen = vm.IsBookingOpen; 
 
             if (vm.ImageFile != null)
             {
@@ -252,6 +273,7 @@ namespace BookMyMovies.Controllers
             TempData["SuccessMessage"] = "Movie updated successfully!";
             return RedirectToAction(nameof(Index));
         }
+
 
         [HttpGet]
         [Authorize(Roles = Roles.User)]

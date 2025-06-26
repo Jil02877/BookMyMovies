@@ -30,5 +30,6 @@ namespace BookMyMovies.ViewModels
         public string? ExistingImageUrl { get; set; }
 
         public int SeatsBooked { get; set; }
+        public bool IsBookingOpen { get; set; }
     }
 }

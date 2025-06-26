@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BookMyMovies.Migrations
 {
     /// <inheritdoc />
-    public partial class intial : Migration
+    public partial class final_updated_mig : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -173,7 +173,8 @@ namespace BookMyMovies.Migrations
                     TotalSeats = table.Column<int>(type: "int", nullable: false),
                     SeatLayoutJson = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Price = table.Column<float>(type: "real", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsBookingOpen = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -184,6 +185,33 @@ namespace BookMyMovies.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BookingNotifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    MoviePostingId = table.Column<int>(type: "int", nullable: false),
+                    SubscribedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BookingNotifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BookingNotifications_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_BookingNotifications_MoviePostings_MoviePostingId",
+                        column: x => x.MoviePostingId,
+                        principalTable: "MoviePostings",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -266,6 +294,16 @@ namespace BookMyMovies.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BookingNotifications_MoviePostingId",
+                table: "BookingNotifications",
+                column: "MoviePostingId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BookingNotifications_UserId",
+                table: "BookingNotifications",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Bookings_MoviePostingId",
                 table: "Bookings",
                 column: "MoviePostingId");
@@ -303,6 +341,9 @@ namespace BookMyMovies.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "BookingNotifications");
 
             migrationBuilder.DropTable(
                 name: "Bookings");

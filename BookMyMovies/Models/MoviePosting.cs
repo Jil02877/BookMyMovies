@@ -54,6 +54,7 @@ namespace BookMyMovies.Models
         [ForeignKey(nameof(UserId))]
         public IdentityUser User { get; set; }
 
+        public bool IsBookingOpen { get; set; } = false;
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     }
 }

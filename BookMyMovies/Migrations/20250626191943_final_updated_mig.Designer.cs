@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookMyMovies.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250614122012_intial")]
-    partial class intial
+    [Migration("20250626191943_final_updated_mig")]
+    partial class final_updated_mig
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,6 +79,33 @@ namespace BookMyMovies.Migrations
                     b.ToTable("Bookings");
                 });
 
+            modelBuilder.Entity("BookMyMovies.Models.BookingNotification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("MoviePostingId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SubscribedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MoviePostingId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BookingNotifications");
+                });
+
             modelBuilder.Entity("BookMyMovies.Models.MoviePosting", b =>
                 {
                     b.Property<int>("Id")
@@ -96,6 +123,9 @@ namespace BookMyMovies.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsApproved")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsBookingOpen")
                         .HasColumnType("bit");
 
                     b.Property<string>("Location")
@@ -349,6 +379,25 @@ namespace BookMyMovies.Migrations
                     b.HasOne("BookMyMovies.Models.MoviePosting", null)
                         .WithMany("Bookings")
                         .HasForeignKey("MoviePostingId1");
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("MoviePosting");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BookMyMovies.Models.BookingNotification", b =>
+                {
+                    b.HasOne("BookMyMovies.Models.MoviePosting", "MoviePosting")
+                        .WithMany()
+                        .HasForeignKey("MoviePostingId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
                         .WithMany()

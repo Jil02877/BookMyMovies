@@ -61,7 +61,12 @@
                 <img src="@Model.ExistingImageUrl" alt="Movie Poster" width="200" />
             }
         </div>
-
+        <div class="mb-3 form-check">
+            <input class="form-check-input" asp-for="IsBookingOpen" type="checkbox" />
+            <label class="form-check-label" asp-for="IsBookingOpen">
+                Booking Open
+            </label>
+        </div>
         <button type="submit" class="btn btn-primary">Update Movie</button>
     </form>
 </div>
