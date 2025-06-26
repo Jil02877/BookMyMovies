@@ -1,0 +1,90 @@
+﻿@using Newtonsoft.Json
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Movie Business Insights";
+}
+
+<div class="dashboard-container">
+    <h2 class="title text-center">🎬 Movie Business Dashboard</h2>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-3">💰 Revenue by Movie</h5>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-center mb-3">🎟 Tickets Sold by Movie</h5>
+                    <canvas id="ticketChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const revenueData = @Html.Raw(JsonConvert.SerializeObject(ViewBag.RevenueData));
+    const ticketData = @Html.Raw(JsonConvert.SerializeObject(ViewBag.TicketData));
+
+    const revenueLabels = revenueData.map(r => r.Movie);
+    const revenueValues = revenueData.map(r => r.Revenue);
+    const ticketLabels = ticketData.map(t => t.Movie);
+    const ticketValues = ticketData.map(t => t.Tickets);
+
+    new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+            labels: revenueLabels,
+            datasets: [{
+                label: 'Revenue (₹)',
+                data: revenueValues,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Revenue (₹)' }
+                },
+                x: {
+                    title: { display: true, text: 'Movies' }
+                }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('ticketChart'), {
+        type: 'pie',
+        data: {
+            labels: ticketLabels,
+            datasets: [{
+                label: 'Tickets Sold',
+                data: ticketValues,
+                backgroundColor: ticketLabels.map((_, i) =>
+                    `hsl(${i * (360 / ticketLabels.length)}, 70%, 60%)`)
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>

@@ -32,6 +32,11 @@
         </div>
     }
 
+    <form asp-action="Index" method="get" class="mb-4 d-flex justify-content-end">
+        <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control w-25 me-2" placeholder="Search by movie name" />
+        <button type="submit" class="btn btn-outline-primary">Search</button>
+    </form>
+
 </div>
 <h1 class="text-center m-5">All Available Movies</h1>
 @if (TempData["BookingMessage"] != null)

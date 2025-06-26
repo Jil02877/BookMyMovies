@@ -31,10 +31,19 @@ namespace BookMyMovies.Controllers
         }
 
         [AllowAnonymous]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchTerm)
         {
             var allMovies = await _repository.GetAllAsync();
             var sortedMovies = allMovies.OrderByDescending(mp => mp.PostedDate).ToList();
+
+            if(!string.IsNullOrEmpty(searchTerm))
+            {
+                sortedMovies = sortedMovies
+                    .Where(mp => mp.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                     .ToList();
+            }
+
+            ViewBag.SearchTerm = searchTerm;
 
             // Pass the whole sorted list to the view
             IEnumerable<MoviePosting> moviesToDisplay = sortedMovies;
@@ -46,6 +55,7 @@ namespace BookMyMovies.Controllers
                     var userId = _userManager.GetUserId(User);
                     moviesToDisplay = sortedMovies.Where(mp => mp.UserId == userId);
                 }
+
 
                 if (User.IsInRole(Roles.User))
                 {
