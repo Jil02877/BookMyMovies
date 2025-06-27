@@ -42,7 +42,8 @@ namespace BookMyMovies
 
             builder.Services.AddControllersWithViews();
 
-           
+            builder.Services.AddSingleton<GeminiService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

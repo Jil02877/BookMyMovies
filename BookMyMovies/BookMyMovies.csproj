@@ -20,6 +20,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
     <PackageReference Include="NETCore.MailKit" Version="2.1.0" />
     <PackageReference Include="QRCoder" Version="1.6.0" />
+    <PackageReference Include="RestSharp" Version="112.1.0" />
     <PackageReference Include="TwoFactorAuthenticator.QrCoder" Version="1.1.0" />
   </ItemGroup>
 

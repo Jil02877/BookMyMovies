@@ -1,4 +1,5 @@
 ﻿using BookMyMovies.Data;
+using BookMyMovies.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Elfie.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,11 @@ namespace BookMyMovies.Controllers
     public class BotController : Controller
     {
         private readonly ApplicationDbContext _context;
-
-        public BotController(ApplicationDbContext context)
+        private readonly GeminiService _gemini;
+        public BotController(ApplicationDbContext context,GeminiService gemini)
         {
             _context = context;
+            _gemini = gemini;
         }
 
         [HttpPost("chat")]
@@ -26,6 +28,15 @@ namespace BookMyMovies.Controllers
             {
                 return BadRequest("Empty message.");
             }
+
+
+            // Gemini System Prompt
+            string systemPrompt = @"
+You are a helpful assistant for a movie ticket booking website. 
+You can answer questions about booking tickets, seat availability, showtimes, and notify users politely when info is missing. 
+If user asks about 'Titanic seat availability', and cinema/date/showtime is not provided, ask them for those details in a clear and friendly way.
+";
+
             else if (message.Contains("hi") || message.Contains("hello") || message.Contains("hey"))
             {
                 reply = "👋 Hello! I'm your Movie Assistant. Ask me about bookings, seat availability, or say 'help' for options.";
@@ -63,7 +74,7 @@ namespace BookMyMovies.Controllers
             }
             else
             {
-                reply = "❌ Please enter a valid booking-related query.";
+                reply = await _gemini.AskGeminiAsync($"You are a chatbot for a movie ticket booking website. The user asked: \"{request.Message}\". Reply helpfully related to movie booking.");
             }
 
             return Ok(new { reply });
