@@ -115,15 +115,16 @@
         <source src="~/music/background.mp3" type="audio/mpeg">
         </audio>
         <!-- 🔹 Chatbot Container (Bottom-Right) -->
- <div id="chatbot-box">
-    <button onclick="toggleChat()">
+<div id="chatbot-box" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+    <button onclick="toggleChat()" style="background-color:#007bff;color:#fff;padding:10px 15px;border:none;border-radius:5px;">
         💬 Chat
     </button>
-    <div id="chatbot">
-        <div id="chat-messages"></div>
+
+    <div id="chatbot" style="display: none; overflow-y: auto;">
+        <div id="chat-messages" style="height: 85%; overflow-y: auto;"></div>
         <input type="text" id="chat-input" placeholder="Type your question..." class="form-control mt-2" onkeypress="if(event.key==='Enter') sendChat()" />
     </div>
- </div>
+</div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
@@ -161,42 +162,59 @@
         });
 
         // Mute/Unmute functionality
+       function applyMusicState(isMuted) {
+            music.muted = isMuted;
+            musicIcon.className = isMuted ? 'bi bi-volume-up-fill' : 'bi bi-volume-mute-fill';
+            musicLabel.textContent = isMuted ? 'Unmute' : 'Mute';
+            localStorage.setItem('musicMuted', isMuted);
+       }
+
+       // Restore music state on load
+        const storedMuted = localStorage.getItem('musicMuted') === 'true';
+        applyMusicState(storedMuted);
+
         musicBtn?.addEventListener('click', () => {
-            if (music.muted) {
-                music.muted = false;
-                musicIcon.className = 'bi bi-volume-mute-fill' ;
-                musicLabel.textContent = 'Mute';
-            } else {
-                music.muted = true;
-                musicIcon.className = 'bi bi-volume-up-fill' ;
-                musicLabel.textContent = 'Unmute';
-            }
+         const isMuted = !music.muted;
+         applyMusicState(isMuted);
         });
 
         // Auto-play workaround for browsers that block autoplay with sound
         document.addEventListener('click', function enableAudioOnce() {
-            music.play().catch(() => { });
+           if (!storedMuted) {
+                 music.play().catch(() => {});
+            }
             document.removeEventListener('click', enableAudioOnce);
         });
     </script>
 
     @* chatbot logic *@
     
-    <script>
-        function toggleChat() {
-            const chat = document.getElementById("chatbot");
-            chat.style.display = chat.style.display === "none" ? "block" : "none";
-        } 
+ <script>
+    function toggleChat() {
+        const chat = document.getElementById("chatbot");
+        const isVisible = window.getComputedStyle(chat).display === "block";
 
-        async function sendChat() {
-        
+        chat.style.display = isVisible ? "none" : "block";
+
+        // Save user preference to localStorage
+        localStorage.setItem("chatbotVisible", (!isVisible).toString());
+    }
+
+    // On page load, restore chatbot visibility state
+    window.addEventListener("DOMContentLoaded", () => {
+        const chat = document.getElementById("chatbot");
+        const visible = localStorage.getItem("chatbotVisible") === "true";
+        chat.style.display = visible ? "block" : "none";
+    });
+
+    async function sendChat() {
         const input = document.getElementById("chat-input");
         const chatBox = document.getElementById("chat-messages");
 
         const userMessage = input.value.trim();
         if (!userMessage) return;
 
-        chatBox.innerHTML +=  `<div><strong>You:</strong> ${userMessage}</div>`;
+        chatBox.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
         input.value = "";
 
         try {
@@ -210,14 +228,15 @@
 
             const data = await response.json();
             const botReply = data.reply;
-            
-            // Show bot reply
+
             chatBox.innerHTML += `<div><strong>Bot:</strong> ${botReply}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
         } catch (err) {
             chatBox.innerHTML += `<div><strong>Bot:</strong> ❌ Error connecting to bot</div>`;
         }
-       }
+    }
+</script>
+
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)

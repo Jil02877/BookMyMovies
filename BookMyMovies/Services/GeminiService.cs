@@ -11,30 +11,31 @@ namespace BookMyMovies.Services
         public async Task<string> AskGeminiAsync(string prompt)
         {
             var client = new RestClient($"{_endpoint}?key={_apiKey}");
-            var request = new RestRequest("",Method.Post);
+            var request = new RestRequest("", Method.Post);
             request.AddHeader("Content-Type", "application/json");
 
             var body = new
             {
                 contents = new[]
                 {
-                    new {
-                     parts = new[] { new { text = prompt } }
-                    }
+                new {
+                    parts = new[] { new { text = prompt } }
                 }
+            }
             };
+
             request.AddJsonBody(body);
             var response = await client.ExecuteAsync(request);
-            if (!response.IsSuccessful) return "Error from Gemini API.";
+
+            if (!response.IsSuccessful) return "⚠️ Sorry, I'm having trouble right now.";
+
             using var doc = JsonDocument.Parse(response.Content);
-            var text = doc.RootElement
+            return doc.RootElement
                 .GetProperty("candidates")[0]
                 .GetProperty("content")
                 .GetProperty("parts")[0]
                 .GetProperty("text")
                 .GetString();
-
-            return text;
         }
     }
 }

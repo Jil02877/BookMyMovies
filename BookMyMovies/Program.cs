@@ -42,7 +42,7 @@ namespace BookMyMovies
 
             builder.Services.AddControllersWithViews();
 
-            builder.Services.AddSingleton<GeminiService>();
+            builder.Services.AddScoped<GeminiService>();
 
             var app = builder.Build();
 

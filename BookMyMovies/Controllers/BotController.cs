@@ -30,12 +30,6 @@ namespace BookMyMovies.Controllers
             }
 
 
-            // Gemini System Prompt
-            string systemPrompt = @"
-You are a helpful assistant for a movie ticket booking website. 
-You can answer questions about booking tickets, seat availability, showtimes, and notify users politely when info is missing. 
-If user asks about 'Titanic seat availability', and cinema/date/showtime is not provided, ask them for those details in a clear and friendly way.
-";
 
             else if (message.Contains("hi") || message.Contains("hello") || message.Contains("hey"))
             {
