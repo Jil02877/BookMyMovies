@@ -114,6 +114,16 @@
         <audio id="backgroundMusic" autoplay loop>
         <source src="~/music/background.mp3" type="audio/mpeg">
         </audio>
+        <!-- 🔹 Chatbot Container (Bottom-Right) -->
+ <div id="chatbot-box">
+    <button onclick="toggleChat()">
+        💬 Chat
+    </button>
+    <div id="chatbot">
+        <div id="chat-messages"></div>
+        <input type="text" id="chat-input" placeholder="Type your question..." class="form-control mt-2" onkeypress="if(event.key==='Enter') sendChat()" />
+    </div>
+ </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
@@ -170,8 +180,48 @@
         });
     </script>
 
+    @* chatbot logic *@
+    
+    <script>
+        function toggleChat() {
+            const chat = document.getElementById("chatbot");
+            chat.style.display = chat.style.display === "none" ? "block" : "none";
+        } 
+
+        async function sendChat() {
+        
+        const input = document.getElementById("chat-input");
+        const chatBox = document.getElementById("chat-messages");
+
+        const userMessage = input.value.trim();
+        if (!userMessage) return;
+
+        chatBox.innerHTML +=  `<div><strong>You:</strong> ${userMessage}</div>`;
+        input.value = "";
+
+        try {
+            const response = await fetch('api/bot/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: userMessage })
+            });
+
+            const data = await response.json();
+            const botReply = data.reply;
+            
+            // Show bot reply
+            chatBox.innerHTML += `<div><strong>Bot:</strong> ${botReply}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } catch (err) {
+            chatBox.innerHTML += `<div><strong>Bot:</strong> ❌ Error connecting to bot</div>`;
+        }
+       }
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 
 </html>
